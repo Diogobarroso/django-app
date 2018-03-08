@@ -23,21 +23,41 @@ def index(request):
     context = {}
     return HttpResponse(template.render(context, request))
 
+def nameExists(name):
+    for u in User.objects.all():
+        if name == u.name:
+            return True 
+
+    return False
+
+def emailExists(email):
+    for u in User.objects.all():
+        if email == u.email:
+            return True 
+
+    return False
+
 def add(request):
     if request.method == "POST":
         form = PostForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            try:
-                validate_email(user.email)
-            except  ValidationError:
-                form._errors["email"] = ErrorList([u"Insert a valid email"])
-                return render(request, 'polls/add.html', {'form': form})
+            if(not nameExists(user.name)):
+                if(not emailExists(user.email)):
+                    try:
+                        validate_email(user.email)
+                    except  ValidationError:
+                        form._errors["email"] = ErrorList([u"Insert a valid email"])
+                        return render(request, 'polls/add.html', {'form': form}) #return the form with an error
+                    else:
+                        user.save()
+                else:
+                    form._errors["email"] = ErrorList([u"That email is already registered!"])
+                    return render(request, 'polls/add.html', {'form': form}) #return the form with an error
             else:
-                user.save()
+                form._errors["name"] = ErrorList([u"That name is already registered!"])
+                return render(request, 'polls/add.html', {'form': form}) #return the form with an error
             return redirect('list')
-        else:
-            messages.error(request, "Error")
     else:
         form = PostForm()
     return render(request, 'polls/add.html', {'form': form})

@@ -1,6 +1,4 @@
 from django.db import models
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
 
 
 class User(models.Model):
@@ -9,8 +7,3 @@ class User(models.Model):
 
     def __str__(self):
             return self.name
-
-    #def clean_email(self):
-    #    data = self.cleaned_data['email']
-    #    try:
-    #        validate_email(data)
